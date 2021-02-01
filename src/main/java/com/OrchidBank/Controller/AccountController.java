@@ -30,6 +30,7 @@ import com.OrchidBank.Service.AccountService;
 @RequestMapping("/api")
 public class AccountController {
   private static int ORCHID_BAD_REQUEST_CODE = 400;
+  private static int ORCHID_NOT_FOUND_CODE = 404;
   private static int ORCHID_SUCCESS_CODE = 200;
   private static double INITIAL_DEPOSIT_AMOUNT_LIMIT = 500.00;
   private static double ORCHID_MAX_DEPOSIT_LIMIT = 1000000.00;
@@ -39,7 +40,7 @@ public class AccountController {
 
   @PostMapping("/create_account")
   public ResponseEntity<?> createAccount(@RequestBody AccountRequest accountRequest) {
-    // check if account already exit
+    // check if account already exist
     Account found_account = accountService.findByUserAccountName(accountRequest.getAccountName());
     if (found_account != null) {
       return ResponseEntity.badRequest().body(new Create_Depo_Withdraw_Response(
@@ -62,7 +63,7 @@ public class AccountController {
     ObjectAccount found_ObjAccount = accountService.findByObjectAccountNumber(accountNumber);
     if (found_ObjAccount == null) {
       return ResponseEntity.badRequest().body(new Create_Depo_Withdraw_Response(
-          ORCHID_BAD_REQUEST_CODE, false, "Sorry, account doesn't exit!"));
+          ORCHID_NOT_FOUND_CODE, false, "Sorry, account doesn't exist!"));
     } else {
       return ResponseEntity.ok(new AccountInfoResponse(ORCHID_SUCCESS_CODE, true,
           "Account details found successfully.", found_ObjAccount));
@@ -75,7 +76,7 @@ public class AccountController {
     ObjectAccount found_ObjAccount = accountService.findByObjectAccountNumber(accountNumber);
     if (found_ObjAccount == null) {
       return ResponseEntity.badRequest().body(new Create_Depo_Withdraw_Response(
-          ORCHID_BAD_REQUEST_CODE, false, "Sorry, account doesn't exit!"));
+          ORCHID_NOT_FOUND_CODE, false, "Sorry, account doesn't exist!"));
     } else {
       AccountStatement accountStatement =
           accountService.findAccountStatementByAccountNumber(accountNumber);
@@ -95,7 +96,7 @@ public class AccountController {
     Account found_account = accountService.findByUserAccountName(obj_account.getAccountName());
     if (found_account == null) {
       return ResponseEntity.badRequest().body(new Create_Depo_Withdraw_Response(
-          ORCHID_BAD_REQUEST_CODE, false, "Sorry, account for Deposit doesn't exit!"));
+          ORCHID_NOT_FOUND_CODE, false, "Sorry, Account for Deposit doesn't exist!"));
     } else if (depositRequest.getAmount() > ORCHID_MAX_DEPOSIT_LIMIT) {
       return ResponseEntity.badRequest()
           .body(new Create_Depo_Withdraw_Response(ORCHID_BAD_REQUEST_CODE, false,
@@ -123,12 +124,12 @@ public class AccountController {
     System.out.println("Found account: " + found_account);
     if (found_account == null) {
       return ResponseEntity.badRequest().body(new Create_Depo_Withdraw_Response(
-          ORCHID_BAD_REQUEST_CODE, false, "Sorry, account doesn't exit!"));
+          ORCHID_NOT_FOUND_CODE, false, "Sorry, account doesn't exist!"));
     } else {
       // // check again if account name matches
       if (!found_account.getAccountName().equalsIgnoreCase(withdrawReq.getAccountName())) {
         return ResponseEntity.badRequest().body(new Create_Depo_Withdraw_Response(
-            ORCHID_BAD_REQUEST_CODE, false, "Error: Sorry, your account doesn't match again!"));
+            ORCHID_BAD_REQUEST_CODE, false, "Error: Sorry, your account name doesn't match!"));
       }
       // check if amount is greater than balance
       else if (found_account.getInitialDeposit() < withdrawReq.getWithdrawnAmount()) {
